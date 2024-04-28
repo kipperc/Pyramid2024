@@ -65,7 +65,7 @@ class PyramidGame:
         self.place_key()
 
 
-        self.started= False
+        self.game_started= False
         self.key_found = False  # Initialize key_found attribute
         self.current_room = None  # Initialize current_room attribute
        # List of available rooms
