@@ -58,12 +58,13 @@ class PyramidGame:
                 'exits': {'south': 'Treasury'}
             },
         }
+        self.started = False
         self.exit_room = random.choice(list(self.rooms.keys()))
         self.rooms[self.exit_room]['is_exit'] = True  # Mark the exit room
         self.current_room = random.choice(list(self.rooms.keys()))
         self.inventory = []
         self.place_key()
-
+        self.players = {}  # Dictionary to store player information
 
         self.game_started= False
         self.key_found = False  # Initialize key_found attribute
@@ -73,24 +74,36 @@ class PyramidGame:
         # Randomly select a starting room
         self.current_room = random.choice(self.available_rooms)
 
-    def check_win_condition(self, current_room):
-        return self.key_found and current_room == self.exit_room
-
-
-    async def move(self, direction):
+    async def move(self, direction, ctx):
         if direction in self.rooms[self.current_room]['exits']:
             new_room = self.rooms[self.current_room]['exits'][direction]
+
+            # Check if the player has the key to enter the exit room
+            if new_room == self.exit_room and 'key' not in player_inventory.get(ctx.author.id, []):
+                return False, "You need the key to unlock the exit and escape the pyramid."
+
             self.current_room = new_room
+
             # Check if the player has reached the exit room
             if new_room == self.exit_room:
-                # Check if the player has the key in their inventory to win
-                if 'key' in player_inventory[ctx.author.id] and player_current_room[ctx.author.id] == 'Exit':
-                    return True, "Congratulations! You have escaped the pyramid."
-                else:
-                    return False, "You need the key to unlock the exit and escape the pyramid."
+                return True, "Congratulations! You have escaped the pyramid."
+
             return True, f"You move {direction}. {self.rooms[self.current_room]['description']}"
         else:
             return False, "You cannot move in that direction."
+
+    def add_player(self, player_id):
+        # Initialize player attributes
+        self.players[player_id] = {
+            'current_room': None,
+            'has_key': False,
+            'inventory': []
+        }
+
+
+    def check_win_condition(self, current_room):
+        return self.key_found and current_room == self.exit_room
+
     def place_key(self):
         # Get a list of all rooms except the exit room
         candidate_rooms = [room for room in self.rooms.keys() if room != 'Exit']
@@ -114,14 +127,13 @@ class PyramidGame:
             maze += f"{room}: Exits: {', '.join(info['exits'].keys())}\n"
         return maze
 
-
-bot.game = PyramidGame()
 bot.game_started = False  # Set to False initially
 
 # Event: Bot is ready
 @bot.event
 async def on_ready():
     print(f'We have logged in as {bot.user}')
+    bot.game = None  # Initialize the game attribute
 
 @bot.event
 async def on_message(message):
@@ -161,41 +173,35 @@ async def ohshit(ctx):
     """
     await ctx.send(help_message)
 
+
 @bot.command()
 async def start(ctx):
-    # Check if the player is already in a room
-    if player_current_room.get(ctx.author.id) is not None:
-        await ctx.send("You are already in the game.")
-        return
-
-    # Initialize player attributes if not already done
-    if ctx.author.id not in player_current_room:
-        player_current_room[ctx.author.id] = ctx.bot.game.current_room
-        has_key[ctx.author.id] = False
-        player_inventory[ctx.author.id] = []
+    global game_started  # Access the global variable
 
     # Check if a game is already in progress
     if ctx.bot.game is None:
         ctx.bot.game = PyramidGame()  # Create a new instance of PyramidGame
-        bot.game_started = True  # Set game_started flag to True
-        player_current_room[ctx.author.id] = ctx.bot.game.current_room
+        # Initialize player attributes
+        ctx.bot.game.add_player(ctx.author.id)
         await ctx.send("You have started the game!")  # Notify the player
     else:
         await ctx.send("A game is already in progress.")
 
 @bot.command()
 async def take(ctx, item):
-    # Check if the game is started
-    if not bot.game_started:
+    if ctx.author.id not in player_current_room:
         await ctx.send("You are not currently in the game.")
         return
 
-    # Check if the item is the key
     if item.lower() == "key":
-        # Add the key to the player's inventory
-        player_inventory[ctx.author.id].append(item)
-        await ctx.send(f"You have taken the {item}.")
-    else:        await ctx.send(f"The {item} is not available to take.")
+        if 'key' in player_inventory.get(ctx.author.id, []):
+            await ctx.send("You already have the key.")
+            return
+        else:
+            player_inventory.setdefault(ctx.author.id, []).append('key')
+            await ctx.send("You have taken the key.")
+    else:
+        await ctx.send("The specified item cannot be taken.")
 
 @bot.command()
 async def kms(ctx):
@@ -227,52 +233,37 @@ async def west(ctx):
     await move_direction(ctx, 'west')
 
 async def move_direction(ctx, direction):
-    global player_current_room  # Access the global variable
-
-    # Check if the player is in the game
-    if ctx.author.id not in player_current_room:
+    if ctx.bot.game is None:
         await ctx.send("You are not currently in the game.")
         return
 
     game = ctx.bot.game
-    success, message = game.move(direction)
+    success, message = await game.move(direction,ctx)
 
-    # Check if the movement was successful
     if success:
-        # Update the player's current room
-        player_current_room[ctx.author.id] = ctx.bot.game.current_room
         await ctx.send(message)
     else:
-        await ctx.send(message)
+        await ctx.send("You cannot move in that direction.")
 
 @bot.command()
 async def look(ctx):
-    global player_current_room
-
-    # Check if the player is in the game
-    if ctx.author.id not in player_current_room:
+    if ctx.bot.game is None:
         await ctx.send("You are not currently in the game.")
         return
 
-    current_room = player_current_room[ctx.author.id]
-    if current_room is None:
-        await ctx.send("You haven't started the game yet.")
-        return
-
     game = ctx.bot.game
-    current_room_info = game.rooms.get(current_room)
+    current_room_info = game.rooms.get(game.current_room)
 
     if current_room_info:
         items = current_room_info.get('items', [])
         if items:
             item_list = ", ".join(items)
             await ctx.send(f"Items in the room: {item_list}")
-            await ctx.send(f'You are in the {current_room}.')
+            await ctx.send(f'You are in the {game.current_room}.')
         else:
             await ctx.send("There are no items in the room.")
     else:
         await ctx.send("Invalid room. Please start a new game.")
-
 
 # Command: Print the maze layout
 @bot.command()
