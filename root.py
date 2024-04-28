@@ -172,7 +172,7 @@ async def start(ctx):
 
     # Initialize player attributes if not already done
     if ctx.author.id not in player_current_room:
-        player_current_room[ctx.author.id] = None
+        player_current_room[ctx.author.id] = ctx.bot.game.current_room
         has_key[ctx.author.id] = False
         player_inventory[ctx.author.id] = []
 
