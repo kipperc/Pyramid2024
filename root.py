@@ -115,7 +115,6 @@ class PyramidGame:
         return maze
 
 
-game = PyramidGame()
 bot.game = PyramidGame()
 bot.game_started = False  # Set to False initially
 
