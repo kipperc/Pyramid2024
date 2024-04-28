@@ -31,35 +31,6 @@ bot = commands.Bot(command_prefix='!', intents=intents, help_command=CustomHelpC
 
 class PyramidGame:
     def __init__(self):
-        self.started= False
-        self.key_found = False  # Initialize key_found attribute
-        self.current_room = None  # Initialize current_room attribute
-       # List of available rooms
-        self.available_rooms = ['Foyer', 'Antechamber', 'Grand Gallery', 'Treasury', 'Throne Room']
-        # Randomly select a starting room
-        self.current_room = random.choice(self.available_rooms)
-
-    def check_win_condition(self, current_room):
-        return self.key_found and current_room == self.exit_room
-
-
-    async def move(self, direction):
-        if direction in self.rooms[self.current_room]['exits']:
-            new_room = self.rooms[self.current_room]['exits'][direction]
-            self.current_room = new_room
-            # Check if the player has reached the exit room
-            if new_room == self.exit_room:
-                # Check if the player has the key in their inventory to win
-                if 'key' in player_inventory[ctx.author.id] and player_current_room[ctx.author.id] == 'Exit':
-                    return True, "Congratulations! You have escaped the pyramid."
-                else:
-                    return False, "You need the key to unlock the exit and escape the pyramid."
-            return True, f"You move {direction}. {self.rooms[self.current_room]['description']}"
-        else:
-            return False, "You cannot move in that direction."
-
-
-    def __init__(self):
         self.rooms = {
             'Foyer': {
                 'description': 'You are in the Foyer. It is dimly lit with torches on the walls.',
@@ -93,6 +64,33 @@ class PyramidGame:
         self.inventory = []
         self.place_key()
 
+
+        self.started= False
+        self.key_found = False  # Initialize key_found attribute
+        self.current_room = None  # Initialize current_room attribute
+       # List of available rooms
+        self.available_rooms = ['Foyer', 'Antechamber', 'Grand Gallery', 'Treasury', 'Throne Room']
+        # Randomly select a starting room
+        self.current_room = random.choice(self.available_rooms)
+
+    def check_win_condition(self, current_room):
+        return self.key_found and current_room == self.exit_room
+
+
+    async def move(self, direction):
+        if direction in self.rooms[self.current_room]['exits']:
+            new_room = self.rooms[self.current_room]['exits'][direction]
+            self.current_room = new_room
+            # Check if the player has reached the exit room
+            if new_room == self.exit_room:
+                # Check if the player has the key in their inventory to win
+                if 'key' in player_inventory[ctx.author.id] and player_current_room[ctx.author.id] == 'Exit':
+                    return True, "Congratulations! You have escaped the pyramid."
+                else:
+                    return False, "You need the key to unlock the exit and escape the pyramid."
+            return True, f"You move {direction}. {self.rooms[self.current_room]['description']}"
+        else:
+            return False, "You cannot move in that direction."
     def place_key(self):
         # Get a list of all rooms except the exit room
         candidate_rooms = [room for room in self.rooms.keys() if room != 'Exit']
