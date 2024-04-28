@@ -125,8 +125,6 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    global game_started  # Access the global variable
-
     # Check if the message author is the bot itself
     if message.author == bot.user:
         return
