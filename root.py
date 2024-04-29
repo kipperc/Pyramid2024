@@ -33,38 +33,97 @@ class PyramidGame:
     def __init__(self):
         self.exit_room = None
         self.rooms = {
-            'Foyer': {
-                'description': 'You are in the Foyer. It is dimly lit with torches on the walls.',
-                'items': ['torch', 'dog'],
-                'exits': {'north': 'Antechamber'}
-            },
-            'Antechamber': {
-                'description': 'You are in the Antechamber. There is a faint echo in the air.',
-                'items': ['scroll', 'statue'],
-                'exits': {'south': 'Foyer', 'west': 'Grand Gallery'}
-            },
-            'Grand Gallery': {
-                'description': 'You are in the Grand Gallery. The walls are adorned with ancient artwork.',
-                'items': ['painting', 'sarcophagus'],
-                'exits': {'east': 'Antechamber', 'west': 'Treasury'}
-            },
-            'Treasury': {
-                'description': 'You are in the Treasury. Gold and jewels glimmer in the dim light.',
-                'items': ['coin', 'crown'],
-                'exits': {'east': 'Grand Gallery', 'north': 'Throne Room'}
-            },
-            'Throne Room': {
-                'description': 'You are in the Throne Room. A majestic throne sits at the far end.',
-                'items': ['sword', 'shield'],
-                'exits': {'south': 'Treasury'}
-            },
-        }
+    'Foyer': {
+        'description': 'You are in the Foyer. It is dimly lit with torches on the walls.',
+        'items': ['torch', 'dog'],
+        'exits': {'north': 'Antechamber', 'east': 'Hidden Passage'}
+    },
+    'Antechamber': {
+        'description': 'You are in the Antechamber. There is a faint echo in the air.',
+        'items': ['scroll', 'statue'],
+        'exits': {'south': 'Foyer', 'west': 'Grand Gallery'}
+    },
+    'Grand Gallery': {
+        'description': 'You are in the Grand Gallery. The walls are adorned with ancient artwork.',
+        'items': ['painting', 'sarcophagus'],
+        'exits': {'east': 'Antechamber', 'west': 'Treasury'}
+    },
+    'Treasury': {
+        'description': 'You are in the Treasury. Gold and jewels glimmer in the dim light.',
+        'items': ['coin', 'crown'],
+        'exits': {'east': 'Grand Gallery', 'north': 'Throne Room', 'south': 'Candlelit Chamber'}
+    },
+    'Throne Room': {
+        'description': 'You are in the Throne Room. A majestic throne sits at the far end.',
+        'items': ['sword', 'shield'],
+        'exits': {'south': 'Treasury', 'east': 'Enchanted Garden'}
+    },
+    'Hidden Passage': {
+        'description': 'You have found a hidden passage. The air is musty, and the walls are lined with cobwebs.',
+        'items': ['spider', 'dagger'],
+        'exits': {'east': 'Foyer', 'north': 'Dusty Attic'}
+    },
+    'Candlelit Chamber': {
+        'description': 'You enter a Candlelit Chamber. The flickering flames cast eerie shadows on the walls.',
+        'items': ['candle', 'tome'],
+        'exits': {'west': 'Antechamber', 'south': 'Treasury'}
+    },
+    'Chamber of Echoes': {
+        'description': 'Welcome to the Chamber of Echoes. Every sound you make reverberates off the walls.',
+        'items': ['stone', 'bell'],
+        'exits': {'north': 'Throne Room', 'east': 'Grand Gallery'}
+    },
+    'Mystic Observatory': {
+        'description': 'You stand in the Mystic Observatory. The stars twinkle brightly through the domed ceiling.',
+        'items': ['telescope', 'schart'],
+        'exits': {'west': 'Treasury', 'south': 'Crystal Cavern'}
+    },
+    'Crystal Cavern': {
+        'description': 'You enter a Crystal Cavern. The walls are lined with shimmering crystals of every color.',
+        'items': ['crystal', 'gemstone'],
+        'exits': {'east': 'Antechamber', 'south': 'Hidden Passage'}
+    },
+    'Enchanted Garden': {
+        'description': 'You find yourself in an Enchanted Garden. Flowers bloom in vibrant colors all around you.',
+        'items': ['flower', 'fruit'],
+        'exits': {'north': 'Candlelit Chamber', 'west': 'Throne Room'}
+    },
+    'Dusty Attic': {
+        'description': 'You climb up to the Dusty Attic. Old furniture and forgotten relics fill the space.',
+        'items': ['cobweb', 'chest'],
+        'exits': {'down': 'Hidden Passage', 'east': 'Forgotten Library'}
+    },
+    'Serpentine Corridor': {
+        'description': 'You walk through the Serpentine Corridor. The walls twist and turn like a snake.',
+        'items': ['snake', 'artifact'],
+        'exits': {'north': 'Crystal Cavern', 'east': 'Enchanted Garden'}
+    },
+    'Forgotten Library': {
+        'description': 'You enter the Forgotten Library. Dusty tomes line the shelves, waiting to be rediscovered.',
+        'items': ['book', 'scroll'],
+        'exits': {'west': 'Candlelit Chamber', 'east': 'Echoing Hallway'}
+    },
+    'Gloomy Cellar': {
+        'description': 'You descend into the Gloomy Cellar. The air is damp and musty, filled with the scent of decay.',
+        'items': ['knife', 'barrel'],
+        'exits': {'up': 'Dusty Attic', 'north': 'Echoing Hallway'}
+    },
+    'Echoing Hallway': {
+        'description': 'You find yourself in an Echoing Hallway. Every step echoes loudly, filling the space with sound.',
+        'items': ['timepiece', 'lantern'],
+        'exits': {'east': 'Serpentine Corridor', 'west': 'Forgotten Library'}
+    },
+}
+
+
+
+
         self.started = False
         opposite_direction = {
            'north': 'south',
            'south': 'north',
            'east': 'west',
-           'west': 'east'
+           'west': 'east',
         }
         self.exit_room = random.choice(list(self.rooms.keys()))
         if self.exit_room:
@@ -161,7 +220,7 @@ async def ohshit(ctx):
     Commands:
     - !start: Start a new game.
     - !kms: quits the game.
-    - ![direction]: Move to a different room (e.g., !north).
+    - ![direction]: Move to a different room (!north, !south, !east, !west. !up, !down).
     - !look: Look around the current room.
     - !take [item]: Take an item from the room.
     - !maze: Print the layout of the maze.
@@ -192,15 +251,18 @@ async def take(ctx, item):
         await ctx.send("You are not currently in the game.")
         return
 
-    if item.lower() == "key":
-        if 'key' in player_inventory.get(ctx.author.id, []):
-            await ctx.send("You already have the key.")
+    game = ctx.bot.game
+
+    if item.lower() in game.rooms[game.current_room]['items']:
+        if item.lower() in player_inventory.get(ctx.author.id, []):
+            await ctx.send(f"You already have the {item}.")
             return
         else:
-            player_inventory.setdefault(ctx.author.id, []).append('key')
-            await ctx.send("You have taken the key.")
+            player_inventory.setdefault(ctx.author.id, []).append(item.lower())
+            game.rooms[game.current_room]['items'].remove(item.lower())  # Remove item from room
+            await ctx.send(f"You have taken the {item}.")
     else:
-        await ctx.send("The specified item cannot be taken.")
+        await ctx.send("That item is not available in this room.")
 
 @bot.command()
 async def kms(ctx):
@@ -231,13 +293,21 @@ async def east(ctx):
 async def west(ctx):
     await move_direction(ctx, 'west')
 
+@bot.command()
+async def up(ctx):
+    await move_direction(ctx, 'up')
+
+@bot.command()
+async def down(ctx):
+    await move_direction(ctx, 'down')
+
 async def move_direction(ctx, direction):
     if ctx.bot.game is None:
         await ctx.send("You are not currently in the game.")
         return
 
     game = ctx.bot.game
-    success, message = await game.move(direction,ctx)
+    success, message = await game.move(direction, ctx)
 
     if success:
         await ctx.send(message)
@@ -292,6 +362,13 @@ async def escape(ctx):
     else:
         await ctx.send("No game in progress.")
 
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send("Sorry, I didn't recognize that command. Type `!help` to see the list of available commands.")
+    else:
+        # For other errors, you can handle them as needed
+        await ctx.send(f"An error occurred: {str(error)}")
 
 # Run the bot
-bot.run('insert_bot_token_here')
+bot.run('INSERT BOT TOKEN HERE')
