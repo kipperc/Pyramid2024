@@ -146,12 +146,6 @@ async def on_message(message):
         await bot.process_commands(message)
         return
 
-    # Check if the message is from a guild and if it's the first message after the bot joins
-    if message.guild and not bot.game_started:
-        await message.channel.send("Welcome to the game! Please use the !start command to begin.")
-        return
-
-
 # Command: Help
 @bot.command()
 async def ohshit(ctx):
@@ -167,7 +161,6 @@ async def ohshit(ctx):
     - !take [item]: Take an item from the room.
     - !maze: Print the layout of the maze.
     - !ohshit: Display this help message.
-    - !escape: Checks to see if you can escape the pyramid.
 
     Have fun exploring the pyramid!
     """
@@ -189,7 +182,7 @@ async def start(ctx):
 
 @bot.command()
 async def take(ctx, item):
-    if ctx.author.id not in player_current_room:
+    if ctx.bot.game is None:
         await ctx.send("You are not currently in the game.")
         return
 
