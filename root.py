@@ -76,7 +76,7 @@ class PyramidGame:
     'Mystic Observatory': {
         'description': 'You stand in the Mystic Observatory. The stars twinkle brightly through the domed ceiling.',
         'items': ['telescope', 'chart'],
-        'exits': {'west': 'Treasury', 'south': 'Crystal Cavern'}
+        'exits': {'east': 'Treasury', 'south': 'Crystal Cavern'}
     },
     'Crystal Cavern': {
         'description': 'You enter a Crystal Cavern. The walls are lined with shimmering crystals of every color.',
