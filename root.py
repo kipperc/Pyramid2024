@@ -31,6 +31,7 @@ bot = commands.Bot(command_prefix='!', intents=intents, help_command=CustomHelpC
 
 class PyramidGame:
     def __init__(self):
+        self.exit_room = None
         self.rooms = {
             'Foyer': {
                 'description': 'You are in the Foyer. It is dimly lit with torches on the walls.',
@@ -59,13 +60,19 @@ class PyramidGame:
             },
         }
         self.started = False
+        opposite_direction = {
+           'north': 'south',
+           'south': 'north',
+           'east': 'west',
+           'west': 'east'
+        }
         self.exit_room = random.choice(list(self.rooms.keys()))
-        self.rooms[self.exit_room]['is_exit'] = True  # Mark the exit room
+        if self.exit_room:
+            self.rooms[self.exit_room]['is_exit'] = True  # Mark the exit room
         self.current_room = random.choice(list(self.rooms.keys()))
         self.inventory = []
         self.place_key()
         self.players = {}  # Dictionary to store player information
-
         self.game_started= False
         self.key_found = False  # Initialize key_found attribute
         self.current_room = None  # Initialize current_room attribute
@@ -73,24 +80,22 @@ class PyramidGame:
         self.available_rooms = ['Foyer', 'Antechamber', 'Grand Gallery', 'Treasury', 'Throne Room']
         # Randomly select a starting room
         self.current_room = random.choice(self.available_rooms)
+        pass
 
     async def move(self, direction, ctx):
-        if direction in self.rooms[self.current_room]['exits']:
-            new_room = self.rooms[self.current_room]['exits'][direction]
+        if direction not in self.rooms[self.current_room]['exits']:
+            return False, "You can't go that way."
 
-            # Check if the player has the key to enter the exit room
-            if new_room == self.exit_room and 'key' not in player_inventory.get(ctx.author.id, []):
-                return False, "You need the key to unlock the exit and escape the pyramid."
+        new_room = self.rooms[self.current_room]['exits'][direction]
 
-            self.current_room = new_room
+        if new_room == self.exit_room:
+            if 'key' in player_inventory.get(ctx.author.id, []):
+                return True, "Congratulations! You have entered the exit room with the key. You win!"
+            else:
+                return True, "You have entered the exit room without the key. You can still explore."
 
-            # Check if the player has reached the exit room
-            if new_room == self.exit_room:
-                return True, "Congratulations! You have escaped the pyramid."
-
-            return True, f"You move {direction}. {self.rooms[self.current_room]['description']}"
-        else:
-            return False, "You cannot move in that direction."
+        self.current_room = new_room
+        return True, f"You have moved {direction}. You are now in {self.current_room}."
 
     def add_player(self, player_id):
         # Initialize player attributes
@@ -161,6 +166,7 @@ async def ohshit(ctx):
     - !take [item]: Take an item from the room.
     - !maze: Print the layout of the maze.
     - !ohshit: Display this help message.
+    - !escape: Checks to see if you can escape the pyramid.
 
     Have fun exploring the pyramid!
     """
@@ -288,4 +294,4 @@ async def escape(ctx):
 
 
 # Run the bot
-bot.run('')
+bot.run('insert_bot_token_here')
