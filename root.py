@@ -124,6 +124,8 @@ class PyramidGame:
            'south': 'north',
            'east': 'west',
            'west': 'east',
+            'up': 'down',
+            'down': 'up'
         }
         self.exit_room = random.choice(list(self.rooms.keys()))
         if self.exit_room:
