@@ -51,42 +51,42 @@ class PyramidGame:
     'Treasury': {
         'description': 'You are in the Treasury. Gold and jewels glimmer in the dim light.',
         'items': ['coin', 'crown'],
-        'exits': {'east': 'Grand Gallery', 'north': 'Throne Room', 'south': 'Candlelit Chamber'}
+        'exits': {'east': 'Grand Gallery', 'north': 'Throne Room', 'south': 'Candlelit Chamber', 'west': 'Mystic Observatory'}
     },
     'Throne Room': {
         'description': 'You are in the Throne Room. A majestic throne sits at the far end.',
         'items': ['sword', 'shield'],
-        'exits': {'south': 'Treasury', 'east': 'Enchanted Garden'}
+        'exits': {'south': 'Treasury', 'west': 'Mystic Observatory', 'north': 'Chamber of Echoes'}
     },
     'Hidden Passage': {
         'description': 'You have found a hidden passage. The air is musty, and the walls are lined with cobwebs.',
         'items': ['spider', 'dagger'],
-        'exits': {'east': 'Foyer', 'north': 'Dusty Attic'}
+        'exits': {'east': 'Foyer', 'up': 'Dusty Attic'}
     },
     'Candlelit Chamber': {
         'description': 'You enter a Candlelit Chamber. The flickering flames cast eerie shadows on the walls.',
         'items': ['candle', 'tome'],
-        'exits': {'west': 'Antechamber', 'south': 'Treasury'}
+        'exits': {'north': 'Treasury','west':'Crystal Cavern'}
     },
     'Chamber of Echoes': {
         'description': 'Welcome to the Chamber of Echoes. Every sound you make reverberates off the walls.',
         'items': ['stone', 'bell'],
-        'exits': {'north': 'Throne Room', 'east': 'Grand Gallery'}
+        'exits': {'south': 'Throne Room'}
     },
     'Mystic Observatory': {
         'description': 'You stand in the Mystic Observatory. The stars twinkle brightly through the domed ceiling.',
-        'items': ['telescope', 'schart'],
+        'items': ['telescope', 'chart'],
         'exits': {'west': 'Treasury', 'south': 'Crystal Cavern'}
     },
     'Crystal Cavern': {
         'description': 'You enter a Crystal Cavern. The walls are lined with shimmering crystals of every color.',
         'items': ['crystal', 'gemstone'],
-        'exits': {'east': 'Antechamber', 'south': 'Hidden Passage'}
+        'exits': {'north': 'Mystic Observatory', 'east':'Candlelit Chamber'}
     },
     'Enchanted Garden': {
         'description': 'You find yourself in an Enchanted Garden. Flowers bloom in vibrant colors all around you.',
         'items': ['flower', 'fruit'],
-        'exits': {'north': 'Candlelit Chamber', 'west': 'Throne Room'}
+        'exits': {'north': 'Candlelit Chamber'}
     },
     'Dusty Attic': {
         'description': 'You climb up to the Dusty Attic. Old furniture and forgotten relics fill the space.',
@@ -96,22 +96,22 @@ class PyramidGame:
     'Serpentine Corridor': {
         'description': 'You walk through the Serpentine Corridor. The walls twist and turn like a snake.',
         'items': ['snake', 'artifact'],
-        'exits': {'north': 'Crystal Cavern', 'east': 'Enchanted Garden'}
+        'exits': {'west':'Echoing Hallway'}
     },
     'Forgotten Library': {
         'description': 'You enter the Forgotten Library. Dusty tomes line the shelves, waiting to be rediscovered.',
         'items': ['book', 'scroll'],
-        'exits': {'west': 'Candlelit Chamber', 'east': 'Echoing Hallway'}
+        'exits': {'east': 'Echoing Hallway', 'down':'Gloomy Cellar'}
     },
     'Gloomy Cellar': {
         'description': 'You descend into the Gloomy Cellar. The air is damp and musty, filled with the scent of decay.',
         'items': ['knife', 'barrel'],
-        'exits': {'up': 'Dusty Attic', 'north': 'Echoing Hallway'}
+        'exits': {'up': 'Forgotten Library'}
     },
     'Echoing Hallway': {
         'description': 'You find yourself in an Echoing Hallway. Every step echoes loudly, filling the space with sound.',
         'items': ['timepiece', 'lantern'],
-        'exits': {'east': 'Serpentine Corridor', 'west': 'Forgotten Library'}
+        'exits': {'east': 'Serpentine Corridor','west': 'Forgotten Library'}
     },
 }
 
