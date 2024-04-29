@@ -128,8 +128,9 @@ class PyramidGame:
             'down': 'up'
         }
         self.exit_room = random.choice(list(self.rooms.keys()))
-        if self.exit_room:
-            self.rooms[self.exit_room]['is_exit'] = True  # Mark the exit room
+        self.rooms[self.exit_room]['is_exit'] = True  # Mark the exit room
+        chosen_room = random.choice(list(self.rooms.keys()))
+        self.rooms[self.exit_room]['exits'] = self.rooms[chosen_room]['exits']
         self.current_room = random.choice(list(self.rooms.keys()))
         self.inventory = []
         self.place_key()
@@ -163,7 +164,11 @@ class PyramidGame:
         room_items = self.rooms[self.current_room]['items']
         items_message = f"You see the following items in the room: {', '.join(room_items)}." if room_items else "There are no items in the room."
     
-        return True, f"You have moved {direction}. You are now in {self.current_room}. {items_message}"
+        # Get exits information
+        exits_message = f"Exits: {', '.join(self.rooms[self.current_room]['exits'].keys())}"
+
+        return True, f"You have moved {direction}. \nYou are now in {self.current_room}. \n{items_message} \n{exits_message}"
+
 
 
     def add_player(self, player_id):
@@ -382,3 +387,4 @@ async def on_command_error(ctx, error):
 
 # Run the bot
 bot.run('INSERT BOT TOKEN HERE')
+
