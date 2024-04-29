@@ -147,14 +147,22 @@ class PyramidGame:
 
         new_room = self.rooms[self.current_room]['exits'][direction]
 
+        # Check if the new room is the exit room
         if new_room == self.exit_room:
             if 'key' in player_inventory.get(ctx.author.id, []):
                 return True, "Congratulations! You have entered the exit room with the key. You win!"
             else:
                 return True, "You have entered the exit room without the key. You can still explore."
 
+        # Update current room
         self.current_room = new_room
-        return True, f"You have moved {direction}. You are now in {self.current_room}."
+
+        # Check for items in the room
+        room_items = self.rooms[self.current_room]['items']
+        items_message = f"You see the following items in the room: {', '.join(room_items)}." if room_items else "There are no items in the room."
+    
+        return True, f"You have moved {direction}. You are now in {self.current_room}. {items_message}"
+
 
     def add_player(self, player_id):
         # Initialize player attributes
