@@ -124,9 +124,10 @@ class PyramidGame:
                 'exits': {'down': 'Foyer'} 
             }
     }
-        
+        self.players = {}  # To store player details
+        self.active_player = None  # New attribute to track the active player
+        self.current_room = None  # Track the active player's current room
         self.exit_room = None
-        self.rooms = { ... }  # Rooms dictionary as before
         self.started = False
         self.poison_room = None
         self.remaining_moves = 100000
@@ -142,18 +143,54 @@ class PyramidGame:
         pass
     
     def add_player(self, player_id):
-        # When a player is added, they start in a random room
-        start_room = random.choice(list(self.rooms.keys()))
+        valid_rooms = list(self.rooms.keys())
+        if not valid_rooms:
+            raise ValueError("No valid rooms available to start the game.")
+    
+        start_room = random.choice(valid_rooms)
         self.players[player_id] = {
             'current_room': start_room,
             'inventory': []
         }
-        self.current_room = start_room  # Assign the starting room as the player's current room
+    
+        # Set the first added player as the active player
+        if self.active_player is None:
+            self.active_player = player_id
+            self.current_room = self.players[player_id]['current_room']
+    
+        print(f"Player {player_id} starts in {start_room}.")  # Debug info
         
-    def validate_rooms(self):
-        for room_name, room_data in self.rooms.items():
-            if not isinstance(room_data.get('exits', {}), dict):
-                raise ValueError(f"Exits for room {room_name} should be a dictionary!")
+    def set_active_player(self, player_id):
+        if player_id not in self.players:
+            raise ValueError(f"Player {player_id} does not exist.")
+    
+        self.active_player = player_id
+        self.current_room = self.players[player_id]['current_room']  # Update current room based on the active player
+
+    def move_player(self, player_id, direction):
+        # Get current room for the player
+        current_room = self.players[player_id]['current_room']
+    
+        # Check if the direction is valid in the current room
+        if direction in self.rooms[current_room]['exits']:
+            new_room = self.rooms[current_room]['exits'][direction]
+            self.players[player_id]['current_room'] = new_room
+        
+            # Update current_room if this is the active player
+            if player_id == self.active_player:
+                self.current_room = new_room
+            
+            print(f"Player {player_id} moved to {new_room}.")
+        else:
+            print(f"Invalid direction! No exit {direction} in {current_room}.")
+
+
+    def get_player_room(self, player_id):
+        # Get the current room of a player
+        if player_id in self.players:
+            return self.players[player_id]['current_room']
+        else:
+            raise ValueError(f"Player {player_id} does not exist.")
 
 
     def choose_exit_room(self):
@@ -163,12 +200,6 @@ class PyramidGame:
         exit_room = random.choice(candidate_rooms)
         return exit_room
     
-    def get_player_room(self, player_id):
-        # Get the current room of a player
-        if player_id in self.players:
-            return self.players[player_id]['current_room']
-        return None
-
     
     async def move(self, direction, ctx):
         player_id = ctx.author.id
@@ -312,7 +343,6 @@ class GameManager:
 # Create a global instance of GameManager
 game_manager = GameManager()
 game = PyramidGame()
-game.validate_rooms()
 
 # Event: Bot is ready
 @bot.event
@@ -422,10 +452,15 @@ async def move_direction(ctx, direction):
 @bot.command()
 async def start(ctx):
     player_id = ctx.author.id
-    if game_manager.start_game(player_id):
-        await ctx.send(f"{ctx.author.display_name}, you have started your own game!")
+    if player_id not in game_manager.player_games:
+        # Create a new game for the player and add them to the game
+        game = PyramidGame()
+        game.add_player(player_id)  # Add player to the game
+        game_manager.player_games[player_id] = game
+        await ctx.send("You have started a new game!")
     else:
-        await ctx.send(f"{ctx.author.display_name}, you already have an ongoing game!")
+        await ctx.send("You are already in a game!")
+
 
 @bot.command()
 async def kms(ctx):
@@ -444,19 +479,29 @@ async def look(ctx):
         return
 
     game = game_manager.get_game(player_id)
-    current_room = game.current_room
+
+    # Retrieve the player's current room from the players dictionary
+    if player_id in game.players:
+        current_room = game.players[player_id]['current_room']  # Get the player's current room
+    else:
+        await ctx.send("Player not found in the game.")
+        return
+
+    # Fetch the room information
     current_room_info = game.rooms.get(current_room)
 
     if current_room_info:
+        # List items in the room
         room_items = current_room_info.get('items', [])
         items_message = f"You see the following items in the room: {', '.join(room_items)}." if room_items else "There are no items in the room."
+        
+        # List exits from the room
         exits_message = f"Exits: {', '.join(current_room_info['exits'].keys())}"
-
+        
+        # Send the room description
         await ctx.send(f"You are in the {current_room}. \n{items_message} \n{exits_message}")
     else:
         await ctx.send("Invalid room. Please start a new game.")
-
-
 
 
 # Command: Print the maze layout
